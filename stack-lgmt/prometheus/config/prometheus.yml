@@ -1,0 +1,64 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+      monitor: 'docker-host-alpha'
+
+# Load and evaluate rules in this file every 'evaluation_interval' seconds.
+rule_files:
+#  - "alert.rules"
+  - "rules/*.yml"
+
+alerting:
+  alertmanagers:
+  - scheme: http
+    static_configs:
+    - targets:
+      - "alertmanager:9093"
+
+# A scrape configuration containing exactly one endpoint to scrape.
+scrape_configs:
+# This job for local nodeexporter usefule for demo when you run all component (prometheus, grafana) only one machine.
+#  - job_name: 'nodeexporter'
+#    scrape_interval: 5s
+#    static_configs:
+#      - targets: ['nodeexporter:9100']
+#    basic_auth:
+#      username: admin
+#      password: vo6Pk9g-hkit[[monitor
+#
+# Collect metric from target server linux (ub-srv1)
+  - job_name: 'linux_ub-srv1'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['172.16.15.138:9100']
+    basic_auth:
+      username: node_exporter
+      password: vo6Pk9g-hkit[[monitor
+
+# Collect metric from target server windows (w22-srv1)
+  - job_name: 'windows-w22-srv1'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["172.16.15.139:9182"]
+
+  - job_name: 'prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9090']
+    basic_auth:
+      username: admin
+      password: vo6Pk9g-hkit[[monitor
+      
+  # The job name is added as a label \`job=<job_name>\` to any timeseries scraped from this config.
+  - job_name: 'java-app-jvm'
+    static_configs:
+      - targets: ['log-generator-jmx-exporter:9999']
+
+  # Tempo
+  - job_name: 'tempo'
+    static_configs:
+      - targets: [ 'tempo:3200' ]
